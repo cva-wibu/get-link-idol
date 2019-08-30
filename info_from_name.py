@@ -65,7 +65,7 @@ def get_idol_info(profile_link):
 
     return idol_info + "\n\n"
 
-if (__name__ == "__main__"):
+def get_search_query():
     # search query empty
     if (len(sys.argv) <= 1):
         print("Give me some names")
@@ -75,13 +75,20 @@ if (__name__ == "__main__"):
     for arg in sys.argv[1:]:
         search_query += arg + ' '
 
-    search_results = search_idols(search_query)
+    return search_query
 
-    # cannot match anyone
-    if (len(search_results) == 0):
+if (__name__ == "__main__"):
+
+    search_query = get_search_query()
+
+    search_results = search_idols(search_query)
+    search_results = list(search_results)
+
+    is_not_found = len(search_results) == 0
+    if (is_not_found):
         print("404 idol not found")
         sys.exit()
-    
-    for idol in search_results:
-        print(idol['name'])
-        print(get_idol_info(idol['profile_link']))
+    else:
+        for idol in search_results:
+            print(idol['name'])
+            print(get_idol_info(idol['profile_link']))

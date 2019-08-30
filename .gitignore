@@ -1,2 +1,4 @@
 draft.py
 out.html
+credentials.py
+*.pyc
