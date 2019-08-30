@@ -37,7 +37,6 @@ if (__name__ == '__main__'):
     if (is_not_found):
         print('Found no results with that query')
     else:
-        print(search_query)
         for submission in search_results:
             submission.comment_sort = 'best'
 
