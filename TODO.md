@@ -5,4 +5,6 @@
 - [ ] create idol database
 - [x] create idol picture database
 - [ ] perform facial recognition (?) to recognize idol
+    + [ ] build data pipeline
+    + [ ] train and evaluate model
 - [ ] create demo web (using flask?)

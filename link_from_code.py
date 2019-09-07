@@ -2,19 +2,21 @@ import praw
 import sys
 from credentials import Credentials
 
+
 def praw_init():
-    USER_AGENT = ("linux:com.cvawibu.getlinkidol:v0.1.1 (by /u/presariohg)")
-    reddit = praw.Reddit(user_agent     = USER_AGENT,
-                         client_id      = Credentials.CLIENT_ID,
-                         client_secret  = Credentials.CLIENT_SECRET,
-                         username       = Credentials.USERNAME,
-                         password       = Credentials.PASSWORD)
+    USER_AGENT = "linux:com.cvawibu.getlinkidol:v0.1.1 (by /u/presariohg)"
+    reddit = praw.Reddit(user_agent=USER_AGENT,
+                         client_id=Credentials.CLIENT_ID,
+                         client_secret=Credentials.CLIENT_SECRET,
+                         username=Credentials.USERNAME,
+                         password=Credentials.PASSWORD)
 
     return reddit
 
+
 def get_search_query():
     # search query empty
-    if (len(sys.argv) <= 1):
+    if len(sys.argv) <= 1:
         print("Give me some clues")
         sys.exit()
 
@@ -24,7 +26,8 @@ def get_search_query():
 
     return search_query
 
-if (__name__ == '__main__'):
+
+if __name__ == '__main__':
 
     search_query = get_search_query()
 
@@ -34,7 +37,7 @@ if (__name__ == '__main__'):
     search_results = list(search_results)
 
     is_not_found = len(search_results) == 0
-    if (is_not_found):
+    if is_not_found:
         print('Found no results with that query')
     else:
         for submission in search_results:
@@ -44,7 +47,7 @@ if (__name__ == '__main__'):
 
             for comment in submission.comments:
                 # find all links in submission's comments
-                if ("https" in comment.body):
+                if "https" in comment.body:
                     print(comment.body)
                     is_found_link = True
 
