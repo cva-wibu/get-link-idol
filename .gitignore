@@ -3,3 +3,6 @@ out.html
 credentials.py
 *.pyc
 venv/
+data/
+idol.sqlite
+*.swp
