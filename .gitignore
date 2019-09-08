@@ -6,8 +6,4 @@ venv/
 data/
 idol.sqlite
 *.swp
-<<<<<<< HEAD
 .idea/
-=======
-.idea/
->>>>>>> c18945c8c80e159f9a4e4d0ae728e74d8bea1f91

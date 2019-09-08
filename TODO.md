@@ -6,3 +6,4 @@
 - [x] create idol picture database
 - [ ] perform facial recognition (?) to recognize idol
 - [ ] create demo web (using flask?)
+- [ ] try improving crawling speed by aiohttp instead of requests
