@@ -1,11 +1,12 @@
 import os
-from typing import Dict
-import sqlite3
-
 import requests
+import sqlite3
 import bs4 as bs
 
+from typing import Dict
+
 rq = requests.Session()
+BASE_URL = "https://javmodel.com"
 
 
 def create_db():
@@ -28,27 +29,47 @@ def create_db():
     return conn, cur
 
 
-def search_idols():
+def crawl_idols_data():
     """
-    Create a list of all idols
-    :return: List of all idol names
+    Crawl every single idols, each ~10 images
+    :return: a sqlite3 database of idol names and pictures
     """
-    SEARCH_URL = "https://javmodel.com/jav/order_homepages.php?model_cat=6%20Stars%20JAV"
+    import re
 
-    page = rq.get(SEARCH_URL)
-    soup = bs.BeautifulSoup(page.text, 'lxml')
+    idol_count = 0
+    img_count = 0
 
-    results = []
+    first_page = "https://javmodel.com/jav/homepages.php?page=1"
+    page = rq.get(first_page)
 
-    # "text-center" class contains idol names and bio links
-    for search_result in soup.find_all(class_="text-center"):
-        idol = search_result.select("a[href]")[0]
-        result = {"profile_link": f"https://javmodel.com{idol['href']}",
-                  "name": idol.text}
+    total_idol_number = re.findall(r'Total (\d+?) JAVModels Found', page.text)[0]
 
-        results.append(result)
+    next_page = first_page
 
-    return results
+    # repeat until reach last result page
+    while True:
+        page = rq.get(next_page)
+        soup = bs.BeautifulSoup(page.text, 'lxml')
+
+        # "text-center" class contains idol names and bio links
+        for search_result in soup.find_all(class_="text-center"):
+            result = search_result.select("a[href]")[0]
+
+            idol = {"profile_link": BASE_URL + result['href'],
+                    "name": result.text}
+
+            idol_count += 1
+            print(f"Crawling {idol['name']} data ({idol_count}/{total_idol_number})")
+            get_img(idol)
+
+        try:
+            # find next page url
+            next_page = BASE_URL + (soup.find_all("a", string="Next")[0]['href'])
+        except IndexError:
+            # if not found then reached last page, break loop
+            break
+
+    print(f'Crawled {img_count} pictures from {idol_count} idols')
 
 
 def get_img(idol: Dict):
@@ -96,16 +117,8 @@ if __name__ == "__main__":
         pass
 
     conn, cur = create_db()
-    idols = search_idols()
 
-    idol_count = 0
-    img_count = 0
+    crawl_idols_data()
 
-    for idol in idols:
-        idol_count += 1
-        print(f"Crawling {idol['name']} data ({idol_count}/{len(idols)})")
-        get_img(idol)
-
-    print(f'Crawled {img_count} pictures from {idol_count} idols')
     conn.commit()
     conn.close()
