@@ -1,5 +1,4 @@
 import os
-import requests
 import sqlite3
 import bs4 as bs
 import aiohttp
@@ -7,8 +6,8 @@ import asyncio
 
 from typing import Dict
 
-rq = requests.Session()
 BASE_URL = "https://javmodel.com"
+img_count = 0
 
 
 def create_db():
@@ -31,9 +30,6 @@ def create_db():
     return conn, cur
 
 
-img_count = 0
-
-
 async def crawl_idols_data():
     """
     Crawl every single idols, each ~10 images
@@ -41,17 +37,17 @@ async def crawl_idols_data():
     """
     import re
 
+    first_page = "https://javmodel.com/jav/homepages.php?page=1"
+
     idol_count = 0
 
-    first_page = "https://javmodel.com/jav/homepages.php?page=39"
-    page = rq.get(first_page)
-
-    total_idol_number = re.findall(r'Total (\d+?) JAVModels Found', page.text)[0]
-
-    next_page = first_page
-
-    # repeat until reach last result page
     async with aiohttp.ClientSession() as session:
+        async with session.get(first_page) as page:
+            total_idol_number = re.findall(r'Total (\d+?) JAVModels Found', await page.text())[0]
+
+        next_page = first_page
+
+        # repeat until reach last result page
         while True:
             async with session.get(next_page) as page:
                 soup = bs.BeautifulSoup(await page.text(), 'lxml')
@@ -65,7 +61,7 @@ async def crawl_idols_data():
 
                     idol_count += 1
                     print(f"Crawling {idol['name']} data ({idol_count}/{total_idol_number})")
-                    await get_img(idol)
+                    await get_img(idol, session)
 
                 try:
                     # find next page url
@@ -77,9 +73,10 @@ async def crawl_idols_data():
     print(f'Crawled {img_count} pictures from {idol_count} idols')
 
 
-async def get_img(idol: Dict):
+async def get_img(idol: Dict, session: aiohttp.ClientSession):
     """
     Crawl idol images
+    :param session: current session. use the same session to avoid redundancy
     :param idol: dictionary (name, profile_link) of a specific idol
     :return: list of images of the idol
     """
@@ -93,11 +90,8 @@ async def get_img(idol: Dict):
     except FileExistsError:
         pass
 
-    page = rq.get(idol['profile_link'])
-
-    soup = bs.BeautifulSoup(page.text, 'lxml')
-
-    session = aiohttp.ClientSession()
+    async with session.get(idol['profile_link']) as page:
+        soup = bs.BeautifulSoup(await page.text(), 'lxml')
 
     global img_count, conn, cur
     for image in soup.select("img[alt]"):
@@ -111,9 +105,6 @@ async def get_img(idol: Dict):
                 with open(f'{os.path.join(PATH, file_name)}', 'wb') as f:
                     f.write(await response.read())
                 cur.execute('INSERT INTO picture VALUES(?, ?)', (idol_name, file_name))
-                # print(cur.fetchone())
-
-    await session.close()
 
 
 if __name__ == "__main__":
@@ -125,6 +116,5 @@ if __name__ == "__main__":
     conn, cur = create_db()
 
     asyncio.run(crawl_idols_data())
-
     conn.commit()
     conn.close()
