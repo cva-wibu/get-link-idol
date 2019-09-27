@@ -5,6 +5,8 @@ import sqlite3
 import requests
 import bs4 as bs
 
+from control import DATA_PATH, DATABASE_PATH, SEARCH_URL
+
 rq = requests.Session()
 
 
@@ -13,7 +15,7 @@ def create_db():
     Create idol database. WARNING: will erase existing db
     :return: connection, cur
     """
-    conn = sqlite3.connect('idol.sqlite')
+    conn = sqlite3.connect(DATABASE_PATH)
     cur = conn.cursor()
 
     try:
@@ -22,8 +24,9 @@ def create_db():
         pass
 
     cur.execute('CREATE TABLE picture('
-                   'idol_name varchar(40),'
-                   'pic_name varchar(100))')
+                # 'pic_id integer PRIMARY KEY au,'
+                'idol_name varchar(40),'
+                'pic_name varchar(100))')
 
     return conn, cur
 
@@ -33,7 +36,6 @@ def search_idols():
     Create a list of all idols
     :return: List of all idol names
     """
-    SEARCH_URL = "https://javmodel.com/jav/order_homepages.php?model_cat=6%20Stars%20JAV"
 
     page = rq.get(SEARCH_URL)
     soup = bs.BeautifulSoup(page.text, 'lxml')
@@ -60,13 +62,11 @@ def get_img(idol: Dict):
     idol_name = idol['name']
     # idol_name = '_'.join(idol_name.split())
 
-    PATH = os.getcwd()
-    PATH = os.path.join(PATH, 'data')
-    # PATH = os.path.join(PATH, idol_name)
+    # DATA_PATH = os.path.join(DATA_PATH, idol_name)
 
-    # PATH = f'./data/{idol["name"]}'
+    # DATA_PATH = f'./data/{idol["name"]}'
     try:
-        os.mkdir(PATH)
+        os.mkdir(DATA_PATH)
     except FileExistsError:
         pass
 
@@ -83,9 +83,9 @@ def get_img(idol: Dict):
         response = rq.get(image_url)
         if response.status_code == 200:
             img_count += 1
-            with open(f'{os.path.join(PATH, file_name)}', 'wb') as f:
+            with open(f'{os.path.join(DATA_PATH, file_name)}', 'wb') as f:
                 f.write(response.content)
-            cur.execute('INSERT INTO picture VALUES(?, ?)', (idol_name, file_name))
+            cur.execute('INSERT INTO picture("idol_name", "pic_name") VALUES(?, ?)', (idol_name, file_name))
             # print(cur.fetchone())
 
 
