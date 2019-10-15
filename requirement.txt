@@ -4,6 +4,7 @@ beautifulsoup4==4.8.0
 certifi==2019.6.16
 chardet==3.0.4
 credentials==1.1
+facenet-pytorch==0.3.1
 gast==0.2.2
 get==2019.4.13
 google-pasta==0.1.7
@@ -14,6 +15,7 @@ imageio==2.5.0
 Keras==2.2.5
 Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.0
+jupiter==1.0.0
 lxml==4.4.1
 Markdown==3.1.1
 numpy==1.17.2
@@ -38,8 +40,11 @@ tensorboard==1.14.0
 tensorflow==1.14.0
 tensorflow-estimator==1.14.0
 termcolor==1.1.0
+torch==1.2.0
+torchvision==0.4.0
 update-checker==0.16
 urllib3==1.25.3
 websocket-client==0.56.0
 Werkzeug==0.15.6
 wrapt==1.11.2
+
