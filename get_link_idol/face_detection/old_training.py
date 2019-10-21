@@ -1,5 +1,3 @@
-
-
 from facenet_pytorch import MTCNN, training
 from torch.utils.data import DataLoader, SubsetRandomSampler
 from torchvision import datasets, transforms, models

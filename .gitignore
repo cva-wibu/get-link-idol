@@ -1,9 +1,9 @@
 draft.py
 out.html
 credentials.py
+facenet_pytorch
 *.pyc
 venv/
 data/
-idol.sqlite
 *.swp
 .idea/

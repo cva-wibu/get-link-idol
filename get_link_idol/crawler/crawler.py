@@ -5,7 +5,7 @@ import sqlite3
 import requests
 import bs4 as bs
 
-from control import DATA_PATH, DATABASE_PATH, SEARCH_URL
+from control import RAW_DATA_PATH, PROCESSED_DATA_PATH, SEARCH_URL
 
 rq = requests.Session()
 
@@ -15,7 +15,8 @@ def create_db():
     Create idol database. WARNING: will erase existing db
     :return: connection, cur
     """
-    conn = sqlite3.connect(DATABASE_PATH)
+    database_path = os.path.join(PROCESSED_DATA_PATH, 'idol.sqlite')
+    conn = sqlite3.connect(database_path)
     cur = conn.cursor()
 
     try:
@@ -63,12 +64,10 @@ def get_img(idol: Dict):
     # idol_name = '_'.join(idol_name.split())
 
     # DATA_PATH = os.path.join(DATA_PATH, idol_name)
-
     # DATA_PATH = f'./data/{idol["name"]}'
-    try:
-        os.mkdir(DATA_PATH)
-    except FileExistsError:
-        pass
+
+    data_folder = os.path.join(RAW_DATA_PATH, idol_name)
+    os.makedirs(data_folder, exist_ok=True)
 
     page = rq.get(idol['profile_link'])
 
@@ -83,18 +82,15 @@ def get_img(idol: Dict):
         response = rq.get(image_url)
         if response.status_code == 200:
             img_count += 1
-            with open(f'{os.path.join(DATA_PATH, file_name)}', 'wb') as f:
+            with open(f'{os.path.join(data_folder, file_name)}', 'wb') as f:
                 f.write(response.content)
             cur.execute('INSERT INTO picture("idol_name", "pic_name") VALUES(?, ?)', (idol_name, file_name))
             # print(cur.fetchone())
 
 
 if __name__ == "__main__":
-    try:
-        os.mkdir('data')
-    except FileExistsError:
-        pass
-
+    os.makedirs(RAW_DATA_PATH, exist_ok=True)
+    os.makedirs(PROCESSED_DATA_PATH, exist_ok=True)
     conn, cur = create_db()
     idols = search_idols()
 

@@ -1,0 +1,15 @@
+epoch: 20
+train_patience: 5
+batch_size: 32
+valid_ratio: 0.15
+test_ratio: 0.2
+lr: 0.003
+seed: 420
+device: gpu
+#mtcnn
+image_size: 160
+margin: 0
+min_face_size: 20
+threshold: [0.6, 0.7, 0.7]
+factor: 0.709
+prewhiten: True
