@@ -95,6 +95,9 @@ def test(model,
          criterion,
          loader,
          model_dir):
+    # load best model
+    model.load_state_dict(torch.load(os.path.join(model_dir, 'get_idol.pt')))
+
     # monitor test loss and accuracy
     test_loss = 0.
     correct = 0.
@@ -123,24 +126,12 @@ def test(model,
 if __name__ == '__main__':
     cfg = Config()
 
-    mtcnn = MTCNN(
-        image_size=cfg.image_size,
-        margin=cfg.margin,
-        min_face_size=cfg.min_face_size,
-        thresholds=cfg.threshold,
-        factor=cfg.factor,
-        prewhiten=cfg.prewhiten,
-        device=cfg.device)
-
-    train_loader, valid_loader, test_loader = get_dataloader(mtcnn,
-                                                             batch_size=cfg.batch_size,
-                                                             test_ratio=cfg.test_ratio,
-                                                             valid_ratio=cfg.valid_ratio,
-                                                             random_state=cfg.seed,
-                                                             num_workers=cfg.num_workers,
-                                                             pin_memory=cfg.pin_memory)
-
-    del mtcnn
+    train_loader, valid_loader, test_loader, class_idx = get_dataloader(batch_size=cfg.batch_size,
+                                                                        test_ratio=cfg.test_ratio,
+                                                                        valid_ratio=cfg.valid_ratio,
+                                                                        random_state=cfg.seed,
+                                                                        num_workers=cfg.num_workers,
+                                                                        pin_memory=cfg.pin_memory)
 
     model = vgg19(pretrained=True).to(cfg.device)
 
